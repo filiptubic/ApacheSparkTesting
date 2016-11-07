@@ -9,10 +9,11 @@ import org.apache.spark.rdd.RDD
 import org.apache.log4j.{Level, Logger}
 
 object HeatFDM {
-  val size = 1000
+  val size: Int = 4
   val T = 100
   val k = 1
-  val h = 0.2
+  //val h = 0.2
+  val h = 1
   val r = k / (h * h)
   var points: Array[(Int, Double)] = Array()
   var data: RDD[(Int, Double)] = null
@@ -41,17 +42,17 @@ object HeatFDM {
     rootLogger.setLevel(Level.ERROR)
 
     //FDM Heat parallel
-    for (i <- 0 to size by k) {
+    points :+= (0, 0.0d)
+    for (i <- 1 until size by k) {
       points :+= (i, 100.0d * Math.sin(Math.PI * i))
     }
-
+    points :+= (size, 0.0d)
     data = sc.parallelize(points)
 
-    for (i <- 0 to T by k) {
+    for (i <- 1 to T by k) {
       val stencilParts = data.flatMap(x => stencil(x))
       data = stencilParts.reduceByKey((x, y) => x + y)
     }
-
     data.sortBy(x => x._1, true).foreach(println)
   }
 }
