@@ -9,17 +9,18 @@ import org.apache.spark.rdd.RDD
 import org.apache.log4j.{Level, Logger}
 
 object HeatFDM {
-  val size: Int = 100
+  val size = 100
   val N = 200
   val k = 1.0d / (size - 1.0d)
   //val h = 0.2
-  val h = 0.25
+  val h = 0.21
   val r = k / (h * h)
   var points: Array[(Int, Double)] = Array()
-  var data: RDD[(Int, Double)] = null
+  var data: RDD[(Int, Double)] = _
 
   def interior(ix: (Int, Double)): Boolean = {
-    if (ix._1 > 0 && (ix._1 < (size -1))) return true else return false
+    if (ix._1 > 0 && (ix._1 < (size -1))) true
+    else false
   }
 
   def stencil(x: (Int, Double)) = {
