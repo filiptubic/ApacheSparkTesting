@@ -10,7 +10,7 @@ import org.apache.log4j.{Level, Logger}
 
 object HeatFDM {
   val size = 100
-  val N = 200
+  val N = 2000
   val k = 1.0d / (size - 1.0d)
   //val h = 0.2
   val h = 0.21
@@ -52,8 +52,11 @@ object HeatFDM {
     data = sc.parallelize(points)
 
     for (i <- 1 to N by 1) {
+
       val stencilParts = data.flatMap(x => stencil(x))
       data = stencilParts.reduceByKey((x, y) => x + y)
+      if(i % 200 == 0)
+        data.collect()
     }
 
     data.sortBy(x => x._1, true).foreach(println)
