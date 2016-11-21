@@ -58,7 +58,8 @@ object HeatFDM {
       if(i % 200 == 0)
         data.collect()
     }
-
+    println("(0,0.0)")
     data.sortBy(x => x._1, true).foreach(println)
+    println("("+ (size - 1) + ",0.0)")
   }
 }
