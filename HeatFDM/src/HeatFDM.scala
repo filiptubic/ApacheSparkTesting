@@ -12,8 +12,9 @@ object HeatFDM {
   val size = 100
   val N = 2000
   val k = 1.0d / (size - 1.0d)
-  //val h = 0.2
   val h = 0.21
+  val REDUCTION_INTERVAL = 100
+
   val r = k / (h * h)
   var points: Array[(Int, Double)] = Array()
   var data: RDD[(Int, Double)] = _
@@ -44,20 +45,20 @@ object HeatFDM {
 
     //FDM Heat parallel
     points :+= (0, 0.0d)
-    for (i <- 1 until (size - 1) by 1) {
+    for (i <- 1 to size-2) {
       points :+= (i, 100.0d * Math.sin(Math.PI * i * k))
     }
     
     points :+= (size, 0.0d)
     data = sc.parallelize(points)
 
-    for (i <- 1 to N by 1) {
-
+    for (i <- 1 to N) {
       val stencilParts = data.flatMap(x => stencil(x))
       data = stencilParts.reduceByKey((x, y) => x + y)
-      if(i % 200 == 0)
+      if (i % REDUCTION_INTERVAL == 0)
         data.collect()
     }
+
     println("(0,0.0)")
     data.sortBy(x => x._1, true).foreach(println)
     println("("+ (size - 1) + ",0.0)")
